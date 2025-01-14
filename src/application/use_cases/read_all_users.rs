@@ -1,4 +1,4 @@
-use crate::application::dto::user_response_dto::UserResponseDto;
+use crate::application::dto::read_user_output_dto::ReadUserOutputDto;
 use crate::core::services::user_service::UserService;
 
 pub struct GetAllUsersUseCase {
@@ -10,11 +10,15 @@ impl GetAllUsersUseCase {
         GetAllUsersUseCase { service }
     }
 
-    pub fn execute(&self) -> Vec<UserResponseDto> {
+    pub fn execute(&self) -> Vec<ReadUserOutputDto> {
         self.service
             .list_all_users()
             .iter()
-            .map(|user| UserResponseDto::new(user.id, user.name.clone(), user.email.clone()))
+            .map(|user| ReadUserOutputDto {
+                id: user.id,
+                name: user.name.clone(),
+                email: user.email.clone(),
+            })
             .collect()
     }
 }

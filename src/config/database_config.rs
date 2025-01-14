@@ -6,6 +6,7 @@ pub enum DatabaseType {
     Postgres,
 }
 
+#[derive(Clone)]
 pub struct DatabaseConfig {
     pub database_type: DatabaseType,
     pub host: String,

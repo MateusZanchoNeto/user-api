@@ -3,10 +3,12 @@ mod config;
 mod core;
 mod infrastructure;
 mod presentation;
+mod schema;
 
 use crate::config::database_config::DatabaseType::Postgres;
 use crate::config::{env::load_enviroment, settings::Settings};
-use crate::presentation::controllers::user_controller::configure_user_routes;
+use crate::infrastructure::database::postgres::database_manager::DatabaseManager;
+use crate::presentation::controllers::user::configure_user_routes;
 use actix_web::{web, App, HttpServer};
 use std::io::Write;
 use std::process::Command;
@@ -16,17 +18,18 @@ use std::thread;
 async fn main() -> std::io::Result<()> {
     load_enviroment();
 
-    let settings = Settings::new();
+    let mut settings = Settings::new();
     let port = settings.port;
 
     println!("Settings:");
     println!("environment: {}", settings.environment);
     println!("port.......: {}", port);
-    println!("database...: {:?}", settings.database_type);
+    println!("database...: {:?}", settings.database_config.database_type);
 
-    if settings.database_type == Postgres {
+    if settings.database_config.database_type == Postgres {
         start_postgres();
         check_postgres();
+        init_connection_pool(&mut settings);
     }
 
     println!("Starting server...");
@@ -81,4 +84,15 @@ fn check_postgres() {
             thread::sleep(std::time::Duration::from_secs(1));
         }
     }
+}
+
+fn init_connection_pool(settings: &mut Settings) {
+    let database_manager = DatabaseManager::new(&format!(
+        "postgres://{}:{}@{}/{}",
+        settings.database_config.user,
+        settings.database_config.password,
+        settings.database_config.host,
+        settings.database_config.database
+    ));
+    settings.connection_pool = Some(database_manager.get_pool());
 }

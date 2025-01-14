@@ -1,7 +1,7 @@
 #[derive(Debug)]
 pub struct User {
     pub name: String,
-    pub id: u32,
+    pub id: i32,
     pub email: String,
 }
 
@@ -12,7 +12,7 @@ impl PartialEq for User {
 }
 
 impl User {
-    pub fn new(id: u32, name: String, email: String) -> Self {
+    pub fn new(id: i32, name: String, email: String) -> Self {
         User { id, name, email }
     }
 
@@ -28,18 +28,18 @@ mod tests {
     #[test]
     fn test_validate_email() {
         let user = User::new(1, "John".to_string(), "john@email.com".to_string());
-        assert_eq!(user.validate_email(), true);
+        assert!(user.validate_email());
     }
 
     #[test]
     fn test_validate_email_invalid_by_at_sign() {
         let user = User::new(1, "John".to_string(), "john.com".to_string());
-        assert_eq!(user.validate_email(), false);
+        assert!(!user.validate_email());
     }
 
     #[test]
     fn test_validate_email_invalid_by_dot() {
         let user = User::new(1, "John".to_string(), "john@com".to_string());
-        assert_eq!(user.validate_email(), false);
+        assert!(!user.validate_email());
     }
 }

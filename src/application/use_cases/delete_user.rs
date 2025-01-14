@@ -1,3 +1,4 @@
+use crate::application::dto::delete_user_input_dto::DeleteUserInputDto;
 use crate::core::services::user_service::UserService;
 
 pub struct RemoveUserUseCase {
@@ -9,7 +10,8 @@ impl RemoveUserUseCase {
         RemoveUserUseCase { service }
     }
 
-    pub fn execute(&self, id: u32) -> Result<(), String> {
+    pub fn execute(&self, dto: DeleteUserInputDto) -> Result<(), String> {
+        let id = dto.id;
         self.service.remove_user(id)
     }
 }
