@@ -13,7 +13,7 @@ impl UserServiceImpl {
 }
 
 impl UserService for UserServiceImpl {
-    fn create_user(&self, id: i32, name: String, email: String) -> Result<(), String> {
+    fn create_user(&self, id: i32, name: String, email: String) -> Result<User, String> {
         let user = User::new(id, name, email);
 
         if !user.validate_email() {
@@ -27,7 +27,7 @@ impl UserService for UserServiceImpl {
         self.repository.get_user_by_id(id)
     }
 
-    fn remove_user(&self, id: i32) -> Result<(), String> {
+    fn remove_user(&self, id: i32) -> Result<User, String> {
         self.repository.delete_user(id)
     }
 
@@ -35,11 +35,11 @@ impl UserService for UserServiceImpl {
         self.repository.list_users()
     }
 
-    fn get_last_user_id(&self) -> i32 {
-        self.repository.get_last_user_id()
+    fn get_last_user(&self) -> Option<User> {
+        self.repository.get_last_user()
     }
 
-    fn update_user(&self, id: i32, name: String, email: String) -> Result<(), String> {
+    fn update_user(&self, id: i32, name: String, email: String) -> Result<User, String> {
         let user = User::new(id, name, email);
 
         if !user.validate_email() {

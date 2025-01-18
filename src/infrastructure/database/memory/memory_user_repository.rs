@@ -15,13 +15,13 @@ impl MemoryUserRepository {
 }
 
 impl UserRepository for MemoryUserRepository {
-    fn save_user(&self, user: &User) -> Result<(), String> {
+    fn save_user(&self, user: &User) -> Result<User, String> {
         let mut users = self
             .users
             .lock()
             .map_err(|_| "Failed to lock users".to_string())?;
         users.push(self.clone_user(user));
-        Ok(())
+        Ok(self.clone_user(user))
     }
 
     fn get_user_by_id(&self, id: i32) -> Option<User> {
@@ -36,14 +36,15 @@ impl UserRepository for MemoryUserRepository {
             .map(|user| self.clone_user(user))
     }
 
-    fn delete_user(&self, id: i32) -> Result<(), String> {
+    fn delete_user(&self, id: i32) -> Result<User, String> {
         let mut users = self
             .users
             .lock()
             .map_err(|_| "Failed to lock users".to_string())?;
         if let Some(pos) = users.iter().position(|user| user.id == id) {
+            let user = self.clone_user(&users[pos]);
             users.remove(pos);
-            Ok(())
+            Ok(user)
         } else {
             Err("User not found".to_string())
         }
@@ -54,19 +55,22 @@ impl UserRepository for MemoryUserRepository {
         users.iter().map(|user| self.clone_user(user)).collect()
     }
 
-    fn get_last_user_id(&self) -> i32 {
+    fn get_last_user(&self) -> Option<User> {
         let users = self.users.lock().unwrap();
-        users.last().map(|user| user.id).unwrap_or(0)
+        users
+            .last()
+            .map(|user| Some(self.clone_user(user)))
+            .unwrap_or(None)
     }
 
-    fn update_user(&self, user: &User) -> Result<(), String> {
+    fn update_user(&self, user: &User) -> Result<User, String> {
         let mut users = self
             .users
             .lock()
             .map_err(|_| "Failed to lock users".to_string())?;
         if let Some(pos) = users.iter().position(|u| u.id == user.id) {
             users[pos] = self.clone_user(user);
-            Ok(())
+            Ok(self.clone_user(user))
         } else {
             Err("User not found".to_string())
         }
@@ -98,7 +102,7 @@ mod tests {
         let repository = MemoryUserRepository::new();
         repository.drop_database().unwrap();
         let user = User::new(1, "John".to_string(), "john@email.com".to_string());
-        assert_eq!(repository.save_user(&user), Ok(()));
+        assert_eq!(repository.save_user(&user), Ok(user));
     }
 
     #[test]
@@ -116,7 +120,7 @@ mod tests {
         repository.drop_database().unwrap();
         let user = User::new(1, "John".to_string(), "john@email.com".to_string());
         repository.save_user(&user).unwrap();
-        assert_eq!(repository.delete_user(1), Ok(()));
+        assert_eq!(repository.delete_user(1), Ok(user));
     }
 
     #[test]
@@ -138,7 +142,7 @@ mod tests {
         let user2 = User::new(2, "Jane".to_string(), "jane@email.com".to_string());
         repository.save_user(&user1).unwrap();
         repository.save_user(&user2).unwrap();
-        assert_eq!(repository.get_last_user_id(), 2);
+        assert_eq!(repository.get_last_user().unwrap(), user2);
     }
 
     #[test]
@@ -148,6 +152,6 @@ mod tests {
         let user = User::new(1, "John".to_string(), "john@email.com".to_string());
         repository.save_user(&user).unwrap();
         let updated_user = User::new(1, "John Doe".to_string(), "john-doe@email.com".to_string());
-        assert_eq!(repository.update_user(&updated_user), Ok(()));
+        assert_eq!(repository.update_user(&updated_user), Ok(updated_user));
     }
 }

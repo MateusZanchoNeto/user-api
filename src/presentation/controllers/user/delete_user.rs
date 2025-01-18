@@ -11,6 +11,13 @@ struct ErrorResponse {
     message: String,
 }
 
+#[derive(Debug, Serialize)]
+struct Response {
+    id: i32,
+    name: String,
+    email: String,
+}
+
 #[actix_web::delete("/user/{id}")]
 async fn delete_user(data: web::Data<Settings>, id: web::Path<i32>) -> impl Responder {
     let repository = user_repository_factory(&data.connection_pool);
@@ -18,7 +25,11 @@ async fn delete_user(data: web::Data<Settings>, id: web::Path<i32>) -> impl Resp
     let remove_user_use_case = RemoveUserUseCase::new(service);
     let dto = DeleteUserInputDto { id: *id };
     match remove_user_use_case.execute(dto) {
-        Ok(_) => HttpResponse::NoContent().finish(),
+        Ok(deleted_user) => HttpResponse::Ok().json(Response {
+            id: deleted_user.id,
+            name: deleted_user.name,
+            email: deleted_user.email,
+        }),
         Err(e) => HttpResponse::NotFound().json(ErrorResponse { message: e }),
     }
 }

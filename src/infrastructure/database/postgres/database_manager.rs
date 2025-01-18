@@ -22,7 +22,7 @@ impl DatabaseManager {
     }
 
     fn init_pool(url: &str) -> ConnectionPool {
-        let pool = Self::create_pool(&url);
+        let pool = Self::create_pool(url);
         Self::run_migrations(&pool);
         pool
     }

@@ -4,12 +4,11 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-tokio = { version = "1", features = ["full"] }
-tokio-postgres = "0.7.2"
 actix-web = "4.0.0-beta.8"
 serde = { version = "1.0.217", features = ["derive"] }
 dotenv = "0.15.0"
 diesel = { version = "2.2.6", features = ["postgres", "r2d2"] }
-chrono = "0.4.39"
 diesel_migrations = "2.2.0"
 r2d2 = "0.8.10"
+reqwest = { version = "0.12.12", features = ["json"] }
+tokio = { version = "1.43.0", features = ["full"] }

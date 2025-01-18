@@ -17,6 +17,13 @@ struct ErrorResponse {
     message: String,
 }
 
+#[derive(Debug, Serialize)]
+struct Response {
+    id: i32,
+    name: String,
+    email: String,
+}
+
 #[actix_web::put("/user/{id}")]
 async fn update_user(
     data: web::Data<Settings>,
@@ -32,7 +39,11 @@ async fn update_user(
         name: user.name,
         email: user.email,
     }) {
-        Ok(_) => HttpResponse::NoContent().finish(),
+        Ok(updated_user) => HttpResponse::Ok().json(Response {
+            id: updated_user.id,
+            name: updated_user.name,
+            email: updated_user.email,
+        }),
         Err(e) => HttpResponse::NotFound().json(ErrorResponse { message: e }),
     }
 }

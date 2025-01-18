@@ -1,4 +1,5 @@
 use crate::application::dto::create_user_input_dto::CreateUserInputDto;
+use crate::application::dto::create_user_output_dto::CreateUserOutputDto;
 use crate::core::services::user_service::UserService;
 
 pub struct CreateUserUseCase {
@@ -10,8 +11,14 @@ impl CreateUserUseCase {
         CreateUserUseCase { service }
     }
 
-    pub fn execute(&self, dto: CreateUserInputDto) -> Result<(), String> {
-        let last_id = self.service.get_last_user_id();
-        self.service.create_user(last_id + 1, dto.name, dto.email)
+    pub fn execute(&self, dto: CreateUserInputDto) -> Result<CreateUserOutputDto, String> {
+        let last_id = self.service.get_last_user().map_or(0, |user| user.id + 1);
+        self.service
+            .create_user(last_id, dto.name, dto.email)
+            .map(|user| CreateUserOutputDto {
+                id: user.id,
+                name: user.name,
+                email: user.email,
+            })
     }
 }

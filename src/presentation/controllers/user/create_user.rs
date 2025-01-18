@@ -13,6 +13,13 @@ struct Body {
 }
 
 #[derive(Debug, Serialize)]
+struct Response {
+    id: i32,
+    name: String,
+    email: String,
+}
+
+#[derive(Debug, Serialize)]
 struct ErrorResponse {
     message: String,
 }
@@ -27,7 +34,11 @@ async fn create_user(data: web::Data<Settings>, dto: web::Json<Body>) -> impl Re
         name: user.name,
         email: user.email,
     }) {
-        Ok(_) => HttpResponse::Created().finish(),
+        Ok(created_user) => HttpResponse::Created().json(Response {
+            id: created_user.id,
+            name: created_user.name,
+            email: created_user.email,
+        }),
         Err(e) => HttpResponse::BadRequest().json(ErrorResponse { message: e }),
     }
 }
