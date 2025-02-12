@@ -167,24 +167,12 @@ impl UserRepository for PostgresUserRepository {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::config::{env::load_enviroment, settings::Settings};
-    use crate::infrastructure::database::postgres::database_manager::DatabaseManager;
-
-    fn create_pool() -> ConnectionPool {
-        load_enviroment();
-        let settings = Settings::new();
-        let database_manager = DatabaseManager::new(&format!(
-            "postgres://{}:{}@{}/{}",
-            settings.database_config.user,
-            settings.database_config.password,
-            settings.database_config.host,
-            settings.database_config.database
-        ));
-        database_manager.get_pool()
-    }
+    use crate::test_orchestrator::create_pool::create_pool;
+    use crate::test_orchestrator::startup::startup;
 
     #[test]
     fn test_save_user() {
+        startup();
         let repository = PostgresUserRepository::new(create_pool());
         repository.drop_database().unwrap();
         let user = User::new(1, "John".to_string(), "john@email.com".to_string());
@@ -193,6 +181,7 @@ mod tests {
 
     #[test]
     fn test_get_user_by_id() {
+        startup();
         let repository = PostgresUserRepository::new(create_pool());
         repository.drop_database().unwrap();
         let user = User::new(1, "John".to_string(), "john@email.com".to_string());
@@ -202,6 +191,7 @@ mod tests {
 
     #[test]
     fn test_delete_user() {
+        startup();
         let repository = PostgresUserRepository::new(create_pool());
         repository.drop_database().unwrap();
         let user = User::new(1, "John".to_string(), "john@email.com".to_string());
@@ -211,6 +201,7 @@ mod tests {
 
     #[test]
     fn test_list_users() {
+        startup();
         let repository = PostgresUserRepository::new(create_pool());
         repository.drop_database().unwrap();
         let user1 = User::new(1, "John".to_string(), "john@email.com".to_string());
@@ -222,6 +213,7 @@ mod tests {
 
     #[test]
     fn test_get_last_user_id() {
+        startup();
         let repository = PostgresUserRepository::new(create_pool());
         repository.drop_database().unwrap();
         let user1 = User::new(1, "John".to_string(), "john@email.com".to_string());
@@ -233,6 +225,7 @@ mod tests {
 
     #[test]
     fn test_update_user() {
+        startup();
         let repository = PostgresUserRepository::new(create_pool());
         repository.drop_database().unwrap();
         let user = User::new(1, "John".to_string(), "john@email.com".to_string());

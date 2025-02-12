@@ -4,11 +4,12 @@ mod core;
 mod infrastructure;
 mod presentation;
 mod schema;
+pub mod test_orchestrator;
 
 use crate::config::database_config::DatabaseType::Postgres;
 use crate::config::{env::load_enviroment, settings::Settings};
 use crate::infrastructure::database::postgres::database_manager::DatabaseManager;
-use crate::presentation::controllers::user::configure_user_routes;
+use crate::presentation::controllers::configure_routes;
 use actix_web::{web, App, HttpServer};
 use std::io::Write;
 use std::process::Command;
@@ -37,7 +38,7 @@ async fn main() -> std::io::Result<()> {
     HttpServer::new(move || {
         App::new()
             .app_data(web::Data::new(settings.clone()))
-            .configure(configure_user_routes)
+            .configure(configure_routes)
     })
     .bind(format!("127.0.0.1:{}", port))?
     .run()
@@ -58,19 +59,20 @@ fn start_postgres() {
 }
 
 fn check_postgres() {
-    let output = Command::new("docker")
-        .arg("exec")
-        .arg("user-api-db")
-        .arg("pg_isready")
-        .arg("--host")
-        .arg("localhost")
-        .output()
-        .unwrap();
-
     loop {
+        let output = Command::new("docker")
+            .arg("exec")
+            .arg("user-api-db")
+            .arg("pg_isready")
+            .arg("--host")
+            .arg("localhost")
+            .output()
+            .unwrap();
+
         if String::from_utf8_lossy(&output.stdout).contains("accepting connections") {
             break;
         }
+
         for i in 0..4 {
             print!(
                 "\rWaiting for postgres to accept connections{}",
